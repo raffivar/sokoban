@@ -49,6 +49,34 @@ class Sokoban
 
   private
 
+  def man
+    '@'
+  end
+
+  def box
+    'o'
+  end
+
+  def wall
+    '#'
+  end
+
+  def storage
+    '.'
+  end
+
+  def storage_with_man
+    '+'
+  end
+
+  def storage_with_box
+    '*'
+  end
+
+  def space
+    ' '
+  end
+
   def read_level
     open "levels.txt" do |file|
       line = []
@@ -80,7 +108,7 @@ class Sokoban
 
   # This method is not being used in the program, but it's good to have
   def in_board?(x, y)
-    x >= 0 && y >=0 && x < @board.size && y < @board[x].size - 1
+    x >= 0 && y >= 0 && x < @board.size && y < @board[x].size - 1
   end
 
   def won?
@@ -93,32 +121,32 @@ class Sokoban
   end
 
   def move_box(x, y)
-    @board[x][y] = case @board[x][y]
-    when " "  # move box to free space
-      "o"
-    when "."  # move box to storage spot
-      "*"
+    @board[x][y] = case object_at x, y
+    when space
+      box
+    when storage
+      storage_with_box
     end
   end
 
   def move_man(x, y)
     # draw man at new position
-    if @board[x][y] == " " || @board[x][y] == "o"
-      @board[x][y] = "@"
-    elsif @board[x][y] == "." || @board[x][y] == "*"
-      @board[x][y] = "+"
+    @board[x][y] = case object_at x, y
+    when space, box
+      man
+    when storage, storage_with_man
+      storage_with_man
     end
 
     # clear man from previous position
-    if @board[@x][@y] == "@"
-      @board[@x][@y] = " "
-    else
-      @board[@x][@y] = "."
-    end
+    @board[@x][@y] = object_at(@x, @y) == man ? space : storage
 
     # chage man to new position
-    @x = x
-    @y = y
+    @x, @y = x, y
+  end
+
+  def object_at(x, y)
+    @board[x][y]
   end
 
   def move(command)
@@ -149,13 +177,13 @@ class Sokoban
       puts "Invalid command" && return
     end
 
-    case @board[x1][y1]
-    when '#' # if the spot near is a wall
-    when " ", "." # if the spot near the man is free, go there
+    case object_at x1, y1
+    when wall
+    when space, storage
       move_man x1, y1
-    when "o", "*" # if the spot near the man is not free, check the next spot
-      case @board[x2][y2]
-      when " ", "." #if the next spot is free
+    when box, storage_with_box
+      case object_at x2, y2
+      when space, storage
         move_box x2, y2
         move_man x1, y1
       end
