@@ -2,13 +2,31 @@ $board = []
 $x = -1
 $y = -1
 
-def cls
-  system 'cls'
-end
+begin
+  require 'Win32API'
 
-def read_char
-  require "Win32API"
-  Win32API.new("crtdll", "_getch", [], "L").Call
+  def cls
+    system 'cls'
+  end
+
+  def read_char
+    require "Win32API"
+    Win32API.new("crtdll", "_getch", [], "L").Call
+  end
+rescue LoadError
+  def cls
+    system 'clear'
+  end
+
+  def read_char
+    begin
+      system "stty raw -echo"
+      str = STDIN.getc
+    ensure
+      system "stty -raw echo"
+    end
+    str.chr
+  end
 end
 
 def print_board
@@ -21,7 +39,7 @@ end
 
 #This function is not being used in the program, but it's good to have
 def in_board?(x, y)
-  if (x >= 0 && y >=0 && x < $board.size && y < $board[x].size - 1)
+  if x >= 0 && y >=0 && x < $board.size && y < $board[x].size - 1
     true
   else
     false
@@ -73,22 +91,22 @@ def play(command)
   valid_command = true
 
   case command
-    when 119 #up (W)
-    when 115 #down (S)
-    when 97  #left (A)
-    when 100 #right (D)
+  when 'w'
     x1 = $x - 1
     y1 = $y
     x2 = $x - 2
     y2 = $y
+  when 's'
     x1 = $x + 1
     y1 = $y
     x2 = $x + 2
     y2 = $y
+  when 'a'
     x1 = $x
     y1 = $y - 1
     x2 = $x
     y2 = $y - 2
+  when 'd'
     x1 = $x
     y1 = $y + 1
     x2 = $x
@@ -113,6 +131,8 @@ def play(command)
 
     cls
     print_board
+  else
+    abort "Invalid command"
   end
 end
 
@@ -142,10 +162,8 @@ cls
 print_board
 
 begin
-  command = read_char
+  command = read_char.downcase
   play command
-end while command != 113 && check_for_win == false  #quit (Q)
+end while command != 'q' && check_for_win == false
 
-if command == 113
-  puts "Thanks for playing. come back soon! :)"
-end
+puts "Thanks for playing. come back soon! :)"
