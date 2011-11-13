@@ -99,11 +99,7 @@ class Sokoban
   end
 
   def print_board
-    @board.each do |line|
-      line.each do |char|
-        print char
-      end
-    end
+    puts @board.map(&:join)
   end
 
   # This method is not being used in the program, but it's good to have
@@ -112,12 +108,9 @@ class Sokoban
   end
 
   def won?
-    @board.each do |line|
-      line.each do |char|
-        return false if char == 'o'
-      end
+    @board.none? do |line|
+      line.any? { |p| p == box }
     end
-    true
   end
 
   def move_box(x, y)
