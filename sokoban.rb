@@ -35,6 +35,7 @@ class Sokoban
 
   def play
     read_level
+    find_man
     cls
     print_board
 
@@ -79,22 +80,18 @@ class Sokoban
 
   def read_level
     open "levels.txt" do |file|
-      line = []
-      while char = file.getc
-        if char != "\n"
-          if char == "@"
-            @x = @board.size
-            @y = line.size
-          end
-          line << char
-        else
-          line << char
-          @board << line
-          line = []
-        end
+      file.each do |line|
+        @board << line.chars.to_a
       end
-      line << "\n" # end of file is not "\n", but still need to insert the line into the board
-      @board << line
+    end
+  end
+
+  def find_man
+    @board.each_with_index do |line, index|
+      if line.include?(man)
+        @x = index
+        @y = line.index man
+      end
     end
   end
 
