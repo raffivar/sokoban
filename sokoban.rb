@@ -143,27 +143,15 @@ class Sokoban
   end
 
   def move(command)
-    case command
+    x1, y1, x2, y2 = case command
     when 'w'
-      x1 = @x - 1
-      y1 = @y
-      x2 = @x - 2
-      y2 = @y
+      [@x - 1, @y, @x - 2, @y]
     when 's'
-      x1 = @x + 1
-      y1 = @y
-      x2 = @x + 2
-      y2 = @y
+      [@x + 1, @y, @x + 2, @y]
     when 'a'
-      x1 = @x
-      y1 = @y - 1
-      x2 = @x
-      y2 = @y - 2
+      [@x, @y - 1, @x, @y - 2]
     when 'd'
-      x1 = @x
-      y1 = @y + 1
-      x2 = @x
-      y2 = @y + 2
+      [@x, @y + 1, @x, @y + 2]
     when 'q'
       throw :quit
     else
