@@ -38,18 +38,18 @@ class Sokoban
     cls
     print_board
 
-    begin
-      command = read_char.downcase
-      move command
-    end while command != 'q' && check_for_win == false
+    catch :quit do
+      loop do
+        move read_char.downcase
+      end
+    end
 
-    puts "Thanks for playing. come back soon! :)"
+    puts "Thanks for playing. Come back soon! :)"
   end
 
   private
 
   def read_level
-    ######## SAVE LEVEL STATE INTO "$board" ########
     open "levels.txt" do |file|
       line = []
       while char = file.getc
@@ -65,8 +65,7 @@ class Sokoban
           line = []
         end
       end
-      #end of file is not "\n", but still need to insert the line into the board
-      line << "\n"
+      line << "\n" # end of file is not "\n", but still need to insert the line into the board
       @board << line
     end
   end
@@ -79,59 +78,50 @@ class Sokoban
     end
   end
 
-  #This function is not being used in the program, but it's good to have
+  # This method is not being used in the program, but it's good to have
   def in_board?(x, y)
-    if x >= 0 && y >=0 && x < @board.size && y < @board[x].size - 1
-      true
-    else
-      false
-    end
+    x >= 0 && y >=0 && x < @board.size && y < @board[x].size - 1
   end
 
-  def check_for_win
+  def won?
     @board.each do |line|
       line.each do |char|
-        if char == 'o'
-          return false
-        end
+        return false if char == 'o'
       end
     end
-    puts "WIN :)"
-    return true
+    true
   end
 
   def move_box(x, y)
-    case @board[x][y]
-    when " "  #move box to free space
-      @board[x][y] = "o"
-    when "."  #move box to storage spot
-      @board[x][y] = "*"
+    @board[x][y] = case @board[x][y]
+    when " "  # move box to free space
+      "o"
+    when "."  # move box to storage spot
+      "*"
     end
   end
 
   def move_man(x, y)
-    #draw man at new position
+    # draw man at new position
     if @board[x][y] == " " || @board[x][y] == "o"
       @board[x][y] = "@"
     elsif @board[x][y] == "." || @board[x][y] == "*"
       @board[x][y] = "+"
     end
 
-    #clear man from previous position
+    # clear man from previous position
     if @board[@x][@y] == "@"
       @board[@x][@y] = " "
     else
       @board[@x][@y] = "."
     end
 
-    #chage man to new position
+    # chage man to new position
     @x = x
     @y = y
   end
 
   def move(command)
-    valid_command = true
-
     case command
     when 'w'
       x1 = @x - 1
@@ -153,28 +143,30 @@ class Sokoban
       y1 = @y + 1
       x2 = @x
       y2 = @y + 2
+    when 'q'
+      throw :quit
     else
-      valid_command = false
+      puts "Invalid command" && return
     end
 
-    if valid_command
-      if @board[x1][y1] != "#"  #if the spot near isn't a wall
-        case @board[x1][y1]
-        when " ", "." #if the spot near the man is free, go there
-          move_man x1, y1
-        when "o", "*" #if the spot near the man is not free, check the next spot
-          case @board[x2][y2]
-          when " ", "." #if the next spot is free
-            move_box x2, y2
-            move_man x1, y1
-          end
-        end
+    case @board[x1][y1]
+    when '#' # if the spot near is a wall
+    when " ", "." # if the spot near the man is free, go there
+      move_man x1, y1
+    when "o", "*" # if the spot near the man is not free, check the next spot
+      case @board[x2][y2]
+      when " ", "." #if the next spot is free
+        move_box x2, y2
+        move_man x1, y1
       end
+    end
 
-      cls
-      print_board
-    else
-      abort "Invalid command"
+    cls
+    print_board
+
+    if won?
+      puts "WIN :)"
+      throw :quit
     end
   end
 end
