@@ -1,13 +1,13 @@
 Sokoban
 =======
 Currently works under Windows operation systems only
-Currently works with one level only
 
 Instructions:
 W, S, A, D keys to move
 Q to quit
 
 @ - The man
+# - A wall
 o - A box
 . - A free storage spot
 * - A storage spot occupied by a box

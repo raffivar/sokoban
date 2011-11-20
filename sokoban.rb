@@ -7,7 +7,7 @@ begin
 
   def read_char
     require "Win32API"
-    Win32API.new("crtdll", "_getch", [], "L").Call
+    Win32API.new("crtdll", "_getch", [], "L").Call.chr
   end
 rescue LoadError
   def cls
@@ -28,24 +28,32 @@ end
 class Sokoban
   def initialize(levels_filename)
     @levels_filename = levels_filename
+    @last_line = count = File.foreach(@levels_filename).inject(0) {|c, line| c+1}
+    @current_line = 0
+    @current_level_lines = 0
+    @level = 1
     @board = []
     @x = -1
     @y = -1
   end
 
   def play
-    read_level
-    find_man
-    cls
-    print_board
-
     catch :quit do
       loop do
-        move (read_char.chr.downcase)
+        clear_board
+        read_level
+        find_man
+        cls
+        print_board
+        catch :restart_level do
+          catch :win_level do
+            loop do
+              move (read_char.downcase)
+            end
+          end
+        end
       end
     end
-
-    puts "Thanks for playing. Come back soon! :)"
   end
 
   private
@@ -79,9 +87,20 @@ class Sokoban
   end
 
   def read_level
+    @current_level_lines = 0
     open @levels_filename do |file|
+      @current_line.times { file.gets }
       file.each do |line|
         @board << line.chars.to_a
+        @current_line += 1
+        @current_level_lines += 1
+        if line == "\n"
+          begin
+            line = file.gets
+          end while line == "\n"
+          @current_line -= 1
+          break
+        end
       end
     end
   end
@@ -96,9 +115,17 @@ class Sokoban
   end
 
   def print_board
+    puts "Level: #{@level}"
+    puts
     puts @board.map(&:join)
   end
 
+  def clear_board
+    @board = []
+    x = -1
+    y = -1
+  end
+  
   # This method is not being used in the program, but it's good to have
   def in_board?(x, y)
     x >= 0 && y >= 0 && x < @board.size && y < @board[x].size - 1
@@ -150,7 +177,11 @@ class Sokoban
     when 'd'
       [@x, @y + 1, @x, @y + 2]
     when 'q'
+      puts "Thanks for playing. Come back soon! :)"
       throw :quit
+    when 'r'
+      @current_line -= @current_level_lines
+      throw :restart_level
     else
       puts "Invalid command" && return
     end
@@ -171,8 +202,14 @@ class Sokoban
     print_board
 
     if won?
-      puts "WIN :)"
-      throw :quit
+      if (@current_line == @last_line)
+        cls
+        puts "Congratulations! You have won the game! :)"
+        throw :quit
+      else
+        @level += 1
+        throw :win_level
+      end
     end
   end
 end
