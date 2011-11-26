@@ -89,16 +89,15 @@ class Sokoban
   def read_level
     @current_level_lines = 0
     open @levels_filename do |file|
-      @current_line.times { file.gets }
+      @current_line.times { file.gets } #skip all the previous levels
       file.each do |line|
         @board << line.chars.to_a
         @current_line += 1
         @current_level_lines += 1
         if line == "\n"
-          begin
-            line = file.gets
-          end while line == "\n"
-          @current_line -= 1
+          #begin
+          #  line = file.gets
+          #end while line == "\n"
           break
         end
       end
