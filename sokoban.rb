@@ -30,7 +30,7 @@ class Sokoban
     @levels_filename = levels_filename
     @last_line = count = File.foreach(@levels_filename).inject(0) {|c, line| c+1}
     @current_line = 0
-    @current_level_lines = 0
+    @current_level_start_line = 0
     @level = 1
     @board = []
     @x = -1
@@ -87,17 +87,13 @@ class Sokoban
   end
 
   def read_level
-    @current_level_lines = 0
+    @current_level_start_line = @current_line
     open @levels_filename do |file|
       @current_line.times { file.gets } #skip all the previous levels
       file.each do |line|
         @board << line.chars.to_a
         @current_line += 1
-        @current_level_lines += 1
         if line == "\n"
-          #begin
-          #  line = file.gets
-          #end while line == "\n"
           break
         end
       end
@@ -179,7 +175,7 @@ class Sokoban
       puts "Thanks for playing. Come back soon! :)"
       throw :quit
     when 'r'
-      @current_line -= @current_level_lines
+      @current_line = @current_level_start_line
       throw :restart_level
     else
       puts "Invalid command" && return

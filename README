@@ -1,9 +1,16 @@
 Sokoban
 =======
-Currently works under Windows operation systems only
+Currently works under Windows and OSX operation systems only
+
+All of the levels are stored in that file ("levels.txt")
+Rules for creating a custom level:
+There has to be exactly 1 line of space between every two levels.
+The first line must start with the first level.
+The last line must end with the last level.
 
 Instructions:
 W, S, A, D keys to move
+R to restart level
 Q to quit
 
 @ - The man
